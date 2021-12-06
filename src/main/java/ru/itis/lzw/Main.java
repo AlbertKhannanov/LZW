@@ -2,8 +2,6 @@ package ru.itis.lzw;
 
 import ru.itis.lzw.algorithm.LZW;
 
-import java.util.HashMap;
-
 public class Main {
 
     private final static LZW lzw = new LZW();
@@ -16,15 +14,8 @@ public class Main {
         lzw.setDictionary(lzwPrepare.initDictionary(source));
         System.out.println(lzw.getDictionary());
 
-        lzw.algorithm(source);
+        System.out.println(lzw.algorithm(source));
 
         System.out.println(lzw.getDictionary());
-
-
-//        HashMap<Integer, String> test = new HashMap<>();
-//
-//        test.put(1, "qwer");
-//        test.put(1, "Nail");
-//        System.out.println(test);
     }
 }

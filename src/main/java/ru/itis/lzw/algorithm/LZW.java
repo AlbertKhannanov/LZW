@@ -117,6 +117,9 @@ public class LZW {
         }
 
         public String decode(String encoded) {
+            if (encoded.length() == 1) {
+                return dictionary.get("0");
+            }
             StringBuilder result = new StringBuilder();
 
             StringBuilder currentString = new StringBuilder(encoded.substring(0, howManyBitsNeed(dictionary.size())));
@@ -145,7 +148,7 @@ public class LZW {
                     currentString.append(WY);
                 }
 
-                if (i + howManyBitsNeed(dictionary.size()) == encoded.length()) {
+                if (i + howManyBitsNeed(dictionary.size()) >= encoded.length()) {
                     for (String code : dictionary.keySet()) {
                         if (addZeroBits(code, dictionary.size()).equals(Y)) {
                             result.append(dictionary.get(code));
@@ -153,38 +156,6 @@ public class LZW {
                     }
                 }
             }
-//            for (int i = howManyBitsNeed(dictionary.size()); i < encoded.length(); i += howManyBitsNeed(dictionary.size())) {
-//                String WY = currentString + encoded.substring(i, i + howManyBitsNeed(dictionary.size()));
-//                String W = currentString.toString();
-//                String Y = encoded.substring(i, i + howManyBitsNeed(dictionary.size() + 1));
-//
-//                if (!dictionary.containsKey(WY)) {
-//                    for (String code : dictionary.keySet()) {
-//                        if (addZeroBits(code, dictionary.size()).equals(W)) {
-//                            result.append(dictionary.get(code));
-//                        }
-//                    }
-//
-//                    dictionary.put(
-//                            Integer.toBinaryString(dictionary.size()),
-//                            defineSymbols(W, Y)
-//                    );
-//
-//                    currentString.setLength(0);
-//                    currentString.append(Y);
-//                } else {
-//                    currentString.setLength(0);
-//                    currentString.append(WY);
-//                }
-//
-//                if (i + howManyBitsNeed(dictionary.size()) == encoded.length()) {
-//                    for (String code : dictionary.keySet()) {
-//                        if (addZeroBits(code, dictionary.size()).equals(Y)) {
-//                            result.append(dictionary.get(code));
-//                        }
-//                    }
-//                }
-//            }
 
             return result.toString();
         }
@@ -228,14 +199,20 @@ public class LZW {
         private String defineSymbols(String first, String second) {
             StringBuilder result = new StringBuilder();
 
+            boolean isInDict = false;
+            String tempCode = "";
             for (String code : dictionary.keySet()) {
                 if (addZeroBits(code, dictionary.size()).equals(first)) {
                     result.insert(0, dictionary.get(code));
+                    tempCode = code;
                 }
                 if (addZeroBits(code, dictionary.size() + 1).equals(second)) {
+                    isInDict = true;
                     result.append(dictionary.get(code).charAt(0));
                 }
             }
+            if (!isInDict)
+                result.append(dictionary.get(tempCode).charAt(0));
 
             return result.toString();
         }

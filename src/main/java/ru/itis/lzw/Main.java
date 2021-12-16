@@ -6,7 +6,6 @@ import ru.itis.lzw.algorithm.LZW;
 
 import java.util.Scanner;
 
-
 public class Main {
 
     private final static BWT bwt = new BWT();
@@ -18,25 +17,42 @@ public class Main {
 
         Scanner scan = new Scanner(System.in);
 
+        System.out.println("========== Режим работы ===========");
+        System.out.println("1: Кодирование \t ----- \t  2: Декодирование");
+        int mode = scan.nextInt();
 
+        if (mode == 1) {
+            System.out.println("Введите путь до файла с данными: ");
+            String path = scan.next();
 
-        String source = lzwPrepare.readFile("D:\\Another\\Univercity\\Тесты\\LZW\\src\\main\\test.txt");
-        Pair<String, Integer> bwtResult = bwt.modifiedSequence(source);
+            path = "D:\\Another\\Univercity\\Тесты\\LZW\\src\\main\\test.txt";
+            String source = lzwPrepare.readFile(path);
+            Pair<String, Integer> bwtResult = bwt.modifiedSequence(source);
 
-        source = bwtResult.getKey();
-        lzw.setDictionary(lzwPrepare.initDictionary(source));
+            source = bwtResult.getKey();
+            lzw.setDictionary(lzwPrepare.initDictionary(source));
 
-        String encoded = lzw.algorithm(source);
+            String encoded = lzw.algorithm(source);
 
-        System.out.println("Размер исходной строки: " + (source.getBytes().length * 8) + " бит");
-        System.out.println("Размер закодированной строки строки: " + encoded.length() + " бит");
+            lzw.writeToFile(
+                    "./coderResult.txt",
+                    bwtResult.getKey() + "_S_P_L-I-T_A_L_P_H_A-B-_E_T" + bwtResult.getValue() + "_S_P_L-I-T_D_A-T_-A" + encoded
+            );
+        } else if (mode == 2) {
+            String rawData = lzwDecode.readFile("./coderResult.txt");
+            Pair<Pair<String, Integer>, String> indexAndEncoded = lzwDecode.getDataForDecoder(rawData);
 
-        System.out.println("\n------------ DECODE ------------");
+            String alphabet = indexAndEncoded.getKey().getKey();
+            Integer index = indexAndEncoded.getKey().getValue();
+            String encoded = indexAndEncoded.getValue();
 
-        System.out.println(bwtResult);
-        lzwDecode.initDictionary(source);
-        String decode = lzwDecode.decode(encoded);
+            lzwDecode.initDictionary(alphabet);
 
-        System.out.println(bwt.restoreInitString(bwtResult));
+            String lzwDecoded = lzwDecode.decode(encoded);
+
+            String bwtDecoded = bwt.restoreInitString(new Pair<>(lzwDecoded, index));
+
+            lzwDecode.writeToFile("./decoderResult.txt", bwtDecoded);
+        }
     }
 }

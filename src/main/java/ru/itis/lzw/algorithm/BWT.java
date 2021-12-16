@@ -9,7 +9,6 @@ public class BWT {
 
     public Pair<String, Integer> modifiedSequence(String src) {
         // выводим все символы под подходящем
-
         ArrayList<String> cycleOffset = getCycleOffsets(src);
 
         StringBuilder resultTemp = new StringBuilder();

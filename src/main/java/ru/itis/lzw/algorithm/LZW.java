@@ -1,8 +1,10 @@
 package ru.itis.lzw.algorithm;
 
+import javafx.util.Pair;
 import ru.itis.lzw.model.DictionaryPart;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -61,6 +63,16 @@ public class LZW {
         return stringBuilder.toString();
     }
 
+    public void writeToFile(String path, String restoreInitText) {
+        try (FileWriter writer = new FileWriter(path, false)) {
+            writer.write(restoreInitText);
+            writer.flush();
+        } catch (IOException ex) {
+
+            System.out.println(ex.getMessage());
+        }
+    }
+
     public static class Prepare {
 
         public String readFile(String path) {
@@ -114,6 +126,35 @@ public class LZW {
 
         public LinkedHashMap<String, String> getDictionary() {
             return dictionary;
+        }
+
+        public String readFile(String path) {
+            StringBuilder result = new StringBuilder();
+            try (FileReader reader = new FileReader(path)) {
+                int c;
+                while ((c = reader.read()) != -1) {
+                    result.append((char) c);
+                }
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+
+            return result.toString();
+        }
+
+        public Pair<Pair<String, Integer>, String> getDataForDecoder(String rawData) {
+            String alphabet;
+            Integer index;
+            String encoded;
+
+            String[] splitSourceDataWithEncoded = rawData.split("(?<=\\d)_S_P_L-I-T_D_A-T_-A");
+            String[] splitIndexAndAlphabet = splitSourceDataWithEncoded[0].split("_S_P_L-I-T_A_L_P_H_A-B-_E_T(?=\\d)");
+
+            alphabet = splitIndexAndAlphabet[0];
+            index = Integer.parseInt(splitIndexAndAlphabet[1]);
+            encoded = splitSourceDataWithEncoded[1];
+
+            return new Pair<>(new Pair<>(alphabet, index), encoded);
         }
 
         public String decode(String encoded) {
@@ -186,6 +227,16 @@ public class LZW {
             }
 
             return stringBuilder.toString();
+        }
+
+        public void writeToFile(String path, String restoreInitText) {
+            try (FileWriter writer = new FileWriter(path, false)) {
+                writer.write(restoreInitText);
+                writer.flush();
+            } catch (IOException ex) {
+
+                System.out.println(ex.getMessage());
+            }
         }
 
         private Integer howManyBitsNeed(Integer size) {

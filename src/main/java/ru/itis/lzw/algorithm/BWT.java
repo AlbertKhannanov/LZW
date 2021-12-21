@@ -11,10 +11,19 @@ public class BWT {
         // выводим все символы под подходящем
         ArrayList<String> cycleOffset = getCycleOffsets(src);
 
+        System.out.println(cycleOffset);
+
         StringBuilder resultTemp = new StringBuilder();
         int index = 0;
         for (String cyc : cycleOffset) {
-            resultTemp.append(cyc.substring(cyc.length() - 1));
+            int lastSymbolIndex = 0;
+            for (int i = 0; i < cyc.length();) {
+                int utf8Code = cyc.codePointAt(i);
+                if (i + Character.charCount(utf8Code) == cyc.length())
+                    lastSymbolIndex = Character.charCount(utf8Code);
+                i += Character.charCount(utf8Code);
+            }
+            resultTemp.append(cyc.substring(cyc.length() - lastSymbolIndex));
             if (cyc.equals(src)) {
                 index = cycleOffset.indexOf(cyc);
             }
@@ -86,11 +95,13 @@ public class BWT {
         ArrayList<String> cycleOffset = new ArrayList<>();
 
         StringBuilder cycleTemp = new StringBuilder(str);
-        for (int i = 0; i < str.length(); i++) {
+        for (int i = 0; i < str.length();) {
+            int utf8Code = str.codePointAt(i);
             cycleOffset.add(cycleTemp.toString());
-            cycleTemp.append(cycleTemp.substring(1));
-            cycleTemp.append(cycleTemp.substring(0, 1));
+            cycleTemp.append(cycleTemp.substring(Character.charCount(utf8Code)));
+            cycleTemp.append(cycleTemp.substring(0, Character.charCount(utf8Code)));
             cycleTemp.delete(0, str.length());
+            i += Character.charCount(utf8Code);
         }
         Collections.sort(cycleOffset);
 

@@ -27,11 +27,22 @@ public class LZW {
         StringBuilder result = new StringBuilder();
 
         StringBuilder tempStr = new StringBuilder();
-        for (int i = 0; i < source.length(); i++) {
-            tempStr.append(source.charAt(i));
+        for (int i = 0; i < source.length();) {
+            int utf8Code = source.codePointAt(i);
+
+            tempStr.append(source.substring(i, i + Character.charCount(utf8Code)));
             if (!dictionary.containsKey(tempStr.toString())) {
-                String W = tempStr.substring(0, tempStr.length() - 1);
-                String K = tempStr.substring(tempStr.length() - 1);
+                int lastSymbolIndex = 0;
+                for (int j = 0; j < tempStr.length();) {
+                    int utf8CodeTemp = tempStr.codePointAt(j);
+                    if (j + Character.charCount(utf8CodeTemp) == tempStr.length())
+                        lastSymbolIndex = Character.charCount(utf8CodeTemp);
+                    j += Character.charCount(utf8CodeTemp);
+                }
+
+                String W = tempStr.substring(0, tempStr.length() - lastSymbolIndex);
+                String K = tempStr.substring(tempStr.length() - lastSymbolIndex);
+
                 result.append(addZeroBits(dictionary.get(W).getBinaryCode(), dictionary.size() + from));
                 dictionary.put(
                         tempStr.toString(),
@@ -45,9 +56,11 @@ public class LZW {
                 tempStr.append(K);
             }
 
-            if (i + 1 == source.length()) {
+            if (i + Character.charCount(source.codePointAt(i)) == source.length()) {
                 result.append(addZeroBits(dictionary.get(tempStr.toString()).getBinaryCode(), dictionary.size() + from));
             }
+
+            i += Character.charCount(utf8Code);
         }
 
         return result.toString();
@@ -94,11 +107,14 @@ public class LZW {
             HashSet<String> characters = new HashSet<>();
 
             int temp = from;
-            for (int i = 0; i < source.length(); i++) {
-                if (!characters.contains(String.valueOf(source.charAt(i)))) {
-                    result.put(String.valueOf(source.charAt(i)), new DictionaryPart(temp, Integer.toBinaryString(temp++)));
+            for (int i = 0; i < source.length();) {
+                int utf8Code = source.codePointAt(i);
+                String cur = source.substring(i, i + Character.charCount(utf8Code));
+                if (!characters.contains(cur)) {
+                    result.put(cur, new DictionaryPart(temp, Integer.toBinaryString(temp++)));
                 }
-                characters.add(String.valueOf(source.charAt(i)));
+                characters.add(cur);
+                i += Character.charCount(utf8Code);
             }
 
             for (String character : result.keySet()) {
@@ -210,11 +226,17 @@ public class LZW {
             }
 
             int temp = from;
-            for (int i = 0; i < source.length(); i++) {
-                if (!characters.contains(String.valueOf(source.charAt(i)))) {
-                    dictionary.put(addZeroBits(Integer.toBinaryString(temp++), tempSet.size()), String.valueOf(source.charAt(i)));
+            for (int i = 0; i < source.length();) {
+                int utf8Code = source.codePointAt(i);
+                String cur = source.substring(i, i + Character.charCount(utf8Code));
+                if (!characters.contains(cur)) {
+                    dictionary.put(
+                            addZeroBits(Integer.toBinaryString(temp++), tempSet.size()),
+                            cur
+                    );
                 }
-                characters.add(String.valueOf(source.charAt(i)));
+                characters.add(cur);
+                i += Character.charCount(utf8Code);
             }
             initialSize = dictionary.size();
         }
@@ -259,11 +281,11 @@ public class LZW {
                 }
                 if (addZeroBits(code, dictionary.size() + 1).equals(second)) {
                     isInDict = true;
-                    result.append(dictionary.get(code).charAt(0));
+                    result.append(dictionary.get(code));
                 }
             }
             if (!isInDict)
-                result.append(dictionary.get(tempCode).charAt(0));
+                result.append(dictionary.get(tempCode));
 
             return result.toString();
         }

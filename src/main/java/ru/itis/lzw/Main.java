@@ -25,15 +25,17 @@ public class Main {
             System.out.println("Введите путь до файла с данными: ");
             String path = scan.next();
 
-            path = "D:\\Another\\Univercity\\Тесты\\LZW\\src\\main\\test.txt";
             String source = lzwPrepare.readFile(path);
+
             Pair<String, Integer> bwtResult = bwt.modifiedSequence(source);
 
             source = bwtResult.getKey();
+
             lzw.setDictionary(lzwPrepare.initDictionary(source));
 
             String encoded = lzw.algorithm(source);
 
+            System.out.println(source);
             lzw.writeToFile(
                     "./coderResult.txt",
                     bwtResult.getKey() + "_S_P_L-I-T_A_L_P_H_A-B-_E_T" + bwtResult.getValue() + "_S_P_L-I-T_D_A-T_-A" + encoded
@@ -46,9 +48,13 @@ public class Main {
             Integer index = indexAndEncoded.getKey().getValue();
             String encoded = indexAndEncoded.getValue();
 
+            System.out.println(encoded);
+
             lzwDecode.initDictionary(alphabet);
 
             String lzwDecoded = lzwDecode.decode(encoded);
+
+            System.out.println(lzwDecoded);
 
             String bwtDecoded = bwt.restoreInitString(new Pair<>(lzwDecoded, index));
 

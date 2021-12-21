@@ -187,8 +187,6 @@ public class LZW {
                             Integer.toBinaryString(dictionary.size()),
                             defineSymbols(W, Y)
                     );
-                    System.out.println("Новая запись в словаре: " + dictionary.get(Integer.toBinaryString(dictionary.size() - 1)) + "\t" + Integer.toBinaryString(dictionary.size() - 1));
-                    System.out.println("------------------");
 
                     currentString.setLength(0);
                     currentString.append(Y);
@@ -268,7 +266,7 @@ public class LZW {
                 }
                 if (addZeroBits(code, dictionary.size() + 1).equals(second)) {
                     isInDict = true;
-                    result.append(dictionary.get(code));
+                    result.append(dictionary.get(code), 0, Character.charCount(dictionary.get(code).codePointAt(0)));
                 }
             }
             if (!isInDict) {

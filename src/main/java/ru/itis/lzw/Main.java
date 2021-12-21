@@ -32,7 +32,6 @@ public class Main {
             source = bwtResult.getKey();
 
             lzw.initDictionary(source);
-            System.out.println(lzw.getDictionary());
 
             String encoded = lzw.algorithm(source);
 
@@ -53,8 +52,6 @@ public class Main {
             System.out.println(lzwDecode.dictionary);
 
             String lzwDecoded = lzwDecode.decode(encoded);
-
-            System.out.println(lzwDecoded);
 
             String bwtDecoded = bwt.restoreInitString(new Pair<>(lzwDecoded, index));
 

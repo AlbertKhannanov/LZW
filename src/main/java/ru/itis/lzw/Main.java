@@ -31,13 +31,11 @@ public class Main {
 
             source = bwtResult.getKey();
 
-            lzw.setDictionary(lzwPrepare.initDictionary(source));
+            lzw.initDictionary(source);
+            System.out.println(lzw.getDictionary());
 
             String encoded = lzw.algorithm(source);
 
-            System.out.println(source);
-
-            System.out.println(lzw.getDictionary());
             lzw.writeToFile(
                     "./coderResult.txt",
                     bwtResult.getKey() + "_S_P_L-I-T_A_L_P_H_A-B-_E_T" + bwtResult.getValue() + "_S_P_L-I-T_D_A-T_-A" + encoded
@@ -50,9 +48,9 @@ public class Main {
             Integer index = indexAndEncoded.getKey().getValue();
             String encoded = indexAndEncoded.getValue();
 
-            System.out.println(encoded);
-
             lzwDecode.initDictionary(alphabet);
+
+            System.out.println(lzwDecode.dictionary);
 
             String lzwDecoded = lzwDecode.decode(encoded);
 

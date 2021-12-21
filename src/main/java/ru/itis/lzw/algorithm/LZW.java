@@ -1,39 +1,54 @@
 package ru.itis.lzw.algorithm;
 
 import javafx.util.Pair;
-import ru.itis.lzw.model.DictionaryPart;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 public class LZW {
 
-    private LinkedHashMap<String, DictionaryPart> dictionary = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> dictionary = new LinkedHashMap<>();
 
-    public LinkedHashMap<String, DictionaryPart> getDictionary() {
+    public LinkedHashMap<String, String> getDictionary() {
         return dictionary;
     }
 
-    private static final int from = 1;
+    private static final int from = 0;
 
-    public void setDictionary(LinkedHashMap<String, DictionaryPart> dictionary) {
-        this.dictionary = dictionary;
+    public void initDictionary(String source) {
+        LinkedHashSet<String> allSymbols = new LinkedHashSet<>();
+
+        for (int i = 0; i < source.length(); ) {
+            int utf8Code = source.codePointAt(i);
+
+            allSymbols.add(source.substring(i, i + Character.charCount(utf8Code)));
+
+            i += Character.charCount(utf8Code);
+        }
+
+        for (String symbol : allSymbols) {
+            dictionary.put(
+                    symbol,
+                    addZeroBits(Integer.toBinaryString(dictionary.size()), allSymbols.size())
+            );
+        }
     }
+
 
     public String algorithm(String source) {
         StringBuilder result = new StringBuilder();
 
         StringBuilder tempStr = new StringBuilder();
-        for (int i = 0; i < source.length();) {
+        for (int i = 0; i < source.length(); ) {
             int utf8Code = source.codePointAt(i);
 
             tempStr.append(source, i, i + Character.charCount(utf8Code));
             if (!dictionary.containsKey(tempStr.toString())) {
                 int lastSymbolIndex = 0;
-                for (int j = 0; j < tempStr.length();) {
+                for (int j = 0; j < tempStr.length(); ) {
                     int utf8CodeTemp = tempStr.codePointAt(j);
                     if (j + Character.charCount(utf8CodeTemp) == tempStr.length())
                         lastSymbolIndex = Character.charCount(utf8CodeTemp);
@@ -43,13 +58,10 @@ public class LZW {
                 String W = tempStr.substring(0, tempStr.length() - lastSymbolIndex);
                 String K = tempStr.substring(tempStr.length() - lastSymbolIndex);
 
-                result.append(addZeroBits(dictionary.get(W).getBinaryCode(), dictionary.size() + from));
+                result.append(addZeroBits(dictionary.get(W), dictionary.size() + from));
                 dictionary.put(
                         tempStr.toString(),
-                        new DictionaryPart(
-                                dictionary.size() + from,
-                                Integer.toBinaryString(dictionary.size() + from)
-                        )
+                        Integer.toBinaryString(dictionary.size() + from)
                 );
 
                 tempStr.setLength(0);
@@ -57,7 +69,7 @@ public class LZW {
             }
 
             if (i + Character.charCount(source.codePointAt(i)) == source.length()) {
-                result.append(addZeroBits(dictionary.get(tempStr.toString()).getBinaryCode(), dictionary.size() + from));
+                result.append(addZeroBits(dictionary.get(tempStr.toString()), dictionary.size() + from));
             }
 
             i += Character.charCount(utf8Code);
@@ -100,28 +112,6 @@ public class LZW {
             }
 
             return result.toString();
-        }
-
-        public LinkedHashMap<String, DictionaryPart> initDictionary(String source) {
-            LinkedHashMap<String, DictionaryPart> result = new LinkedHashMap<>();
-            HashSet<String> characters = new HashSet<>();
-
-            int temp = from;
-            for (int i = 0; i < source.length();) {
-                int utf8Code = source.codePointAt(i);
-                String cur = source.substring(i, i + Character.charCount(utf8Code));
-                if (!characters.contains(cur)) {
-                    result.put(cur, new DictionaryPart(temp, Integer.toBinaryString(temp++)));
-                }
-                characters.add(cur);
-                i += Character.charCount(utf8Code);
-            }
-
-            for (String character : result.keySet()) {
-                result.get(character).setBinaryCode(addZeroBits(result.get(character).getBinaryCode(), result.size()));
-            }
-
-            return result;
         }
 
         public String addZeroBits(String current, Integer dictionarySize) {
@@ -185,7 +175,6 @@ public class LZW {
                 String W = currentString.toString();
                 String Y = encoded.substring(i, i + howManyBitsNeed(dictionary.size() + 1));
 
-                System.out.println(W);
                 if (!dictionary.containsKey(WY)) {
                     for (String code : dictionary.keySet()) {
                         if (addZeroBits(code, dictionary.size()).equals(W)) {
@@ -198,7 +187,7 @@ public class LZW {
                             Integer.toBinaryString(dictionary.size()),
                             defineSymbols(W, Y)
                     );
-                    System.out.println("Новая запись в словаре: " + dictionary.get(Integer.toBinaryString(dictionary.size() - 1)) + "\t" + Integer.toBinaryString(dictionary.size()));
+                    System.out.println("Новая запись в словаре: " + dictionary.get(Integer.toBinaryString(dictionary.size() - 1)) + "\t" + Integer.toBinaryString(dictionary.size() - 1));
                     System.out.println("------------------");
 
                     currentString.setLength(0);
@@ -221,29 +210,21 @@ public class LZW {
         }
 
         public void initDictionary(String source) {
-            HashSet<String> characters = new HashSet<>();
-            HashSet<String> tempSet = new HashSet<>();
+            LinkedHashSet<String> allSymbols = new LinkedHashSet<>();
 
-            for (int i = 0; i < source.length();) {
+            for (int i = 0; i < source.length(); ) {
                 int utf8Code = source.codePointAt(i);
 
-                tempSet.add(source.substring(i, i + Character.charCount(utf8Code)));
+                allSymbols.add(source.substring(i, i + Character.charCount(utf8Code)));
 
                 i += Character.charCount(utf8Code);
             }
 
-            int temp = from;
-            for (int i = 0; i < source.length();) {
-                int utf8Code = source.codePointAt(i);
-                String cur = source.substring(i, i + Character.charCount(utf8Code));
-                if (!characters.contains(cur)) {
-                    dictionary.put(
-                            addZeroBits(Integer.toBinaryString(temp++), tempSet.size()),
-                            cur
-                    );
-                }
-                characters.add(cur);
-                i += Character.charCount(utf8Code);
+            for (String symbol : allSymbols) {
+                dictionary.put(
+                        addZeroBits(Integer.toBinaryString(dictionary.size()), allSymbols.size()),
+                        symbol
+                );
             }
         }
 

@@ -33,16 +33,31 @@ public class BWT {
     public String restoreInitString(Pair<String, Integer> bwtEncode) {
         ArrayList<StringBuilder> bwtDecode = new ArrayList<>();
 
-        for (int i = 0; i < bwtEncode.getKey().length(); i++) {
-            bwtDecode.add(new StringBuilder(bwtEncode.getKey().substring(i, i + 1)));
+        for (int i = 0; i < bwtEncode.getKey().length();) {
+            int utf8Code = bwtEncode.getKey().codePointAt(i);
+            bwtDecode.add(new StringBuilder(bwtEncode.getKey().substring(i, i + Character.charCount(utf8Code))));
+            i += Character.charCount(utf8Code);
         }
         quickSort(bwtDecode, 0, bwtDecode.size() - 1);
 
-        for (int i = 0; i < bwtEncode.getKey().length() - 1; i++) {
-            for (int j = 0; j < bwtEncode.getKey().length(); j++) {
-                bwtDecode.get(j).insert(0, bwtEncode.getKey().charAt(j));
+        int lastSymbolIndex = 0;
+        for (int j = 0; j < bwtEncode.getKey().length(); ) {
+            int utf8CodeTemp = bwtEncode.getKey().codePointAt(j);
+            if (j + Character.charCount(utf8CodeTemp) == bwtEncode.getKey().length())
+                lastSymbolIndex = Character.charCount(utf8CodeTemp);
+            j += Character.charCount(utf8CodeTemp);
+        }
+
+        for (int i = 0; i < bwtEncode.getKey().length() - lastSymbolIndex;) {
+            int utf8Codetemp = bwtEncode.getKey().codePointAt(i);
+            int temp = 0;
+            for (int j = 0; j < bwtEncode.getKey().length();) {
+                int utf8Code = bwtEncode.getKey().codePointAt(j);
+                bwtDecode.get(temp++).insert(0, bwtEncode.getKey().substring(j, j + Character.charCount(utf8Code)));
+                j += Character.charCount(utf8Code);
             }
             quickSort(bwtDecode, 0, bwtDecode.size() - 1);
+            i += Character.charCount(utf8Codetemp);
         }
 
         return bwtDecode.get(bwtEncode.getValue()).toString();

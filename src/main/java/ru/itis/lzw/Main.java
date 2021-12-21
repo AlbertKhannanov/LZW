@@ -36,6 +36,8 @@ public class Main {
             String encoded = lzw.algorithm(source);
 
             System.out.println(source);
+
+            System.out.println(lzw.getDictionary());
             lzw.writeToFile(
                     "./coderResult.txt",
                     bwtResult.getKey() + "_S_P_L-I-T_A_L_P_H_A-B-_E_T" + bwtResult.getValue() + "_S_P_L-I-T_D_A-T_-A" + encoded

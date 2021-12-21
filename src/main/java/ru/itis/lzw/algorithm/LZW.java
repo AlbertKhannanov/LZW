@@ -17,7 +17,7 @@ public class LZW {
         return dictionary;
     }
 
-    private static final int from = 0;
+    private static final int from = 1;
 
     public void setDictionary(LinkedHashMap<String, DictionaryPart> dictionary) {
         this.dictionary = dictionary;
@@ -138,7 +138,6 @@ public class LZW {
     public static class Decode {
 
         public LinkedHashMap<String, String> dictionary = new LinkedHashMap<>();
-        private int initialSize = 0;
 
         public LinkedHashMap<String, String> getDictionary() {
             return dictionary;
@@ -186,11 +185,12 @@ public class LZW {
                 String W = currentString.toString();
                 String Y = encoded.substring(i, i + howManyBitsNeed(dictionary.size() + 1));
 
+                System.out.println(W);
                 if (!dictionary.containsKey(WY)) {
-
                     for (String code : dictionary.keySet()) {
                         if (addZeroBits(code, dictionary.size()).equals(W)) {
                             result.append(dictionary.get(code));
+                            break;
                         }
                     }
 
@@ -198,6 +198,8 @@ public class LZW {
                             Integer.toBinaryString(dictionary.size()),
                             defineSymbols(W, Y)
                     );
+                    System.out.println("Новая запись в словаре: " + dictionary.get(Integer.toBinaryString(dictionary.size() - 1)) + "\t" + Integer.toBinaryString(dictionary.size()));
+                    System.out.println("------------------");
 
                     currentString.setLength(0);
                     currentString.append(Y);
@@ -243,7 +245,6 @@ public class LZW {
                 characters.add(cur);
                 i += Character.charCount(utf8Code);
             }
-            initialSize = dictionary.size();
         }
 
         public String addZeroBits(String current, Integer dictionarySize) {
@@ -290,9 +291,9 @@ public class LZW {
                 }
             }
             if (!isInDict) {
-                System.out.println(dictionary.get(tempCode).substring(0, Character.charCount(dictionary.get(tempCode).codePointAt(0))));
                 result.append(dictionary.get(tempCode), 0, Character.charCount(dictionary.get(tempCode).codePointAt(0)));
             }
+
             return result.toString();
         }
     }

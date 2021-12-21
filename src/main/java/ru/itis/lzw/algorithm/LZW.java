@@ -30,7 +30,7 @@ public class LZW {
         for (int i = 0; i < source.length();) {
             int utf8Code = source.codePointAt(i);
 
-            tempStr.append(source.substring(i, i + Character.charCount(utf8Code)));
+            tempStr.append(source, i, i + Character.charCount(utf8Code));
             if (!dictionary.containsKey(tempStr.toString())) {
                 int lastSymbolIndex = 0;
                 for (int j = 0; j < tempStr.length();) {
@@ -137,7 +137,7 @@ public class LZW {
 
     public static class Decode {
 
-        private LinkedHashMap<String, String> dictionary = new LinkedHashMap<>();
+        public LinkedHashMap<String, String> dictionary = new LinkedHashMap<>();
         private int initialSize = 0;
 
         public LinkedHashMap<String, String> getDictionary() {
@@ -187,6 +187,7 @@ public class LZW {
                 String Y = encoded.substring(i, i + howManyBitsNeed(dictionary.size() + 1));
 
                 if (!dictionary.containsKey(WY)) {
+
                     for (String code : dictionary.keySet()) {
                         if (addZeroBits(code, dictionary.size()).equals(W)) {
                             result.append(dictionary.get(code));
@@ -221,8 +222,12 @@ public class LZW {
             HashSet<String> characters = new HashSet<>();
             HashSet<String> tempSet = new HashSet<>();
 
-            for (int i = 0; i < source.length(); i++) {
-                tempSet.add(String.valueOf(source.charAt(i)));
+            for (int i = 0; i < source.length();) {
+                int utf8Code = source.codePointAt(i);
+
+                tempSet.add(source.substring(i, i + Character.charCount(utf8Code)));
+
+                i += Character.charCount(utf8Code);
             }
 
             int temp = from;
@@ -284,9 +289,10 @@ public class LZW {
                     result.append(dictionary.get(code));
                 }
             }
-            if (!isInDict)
-                result.append(dictionary.get(tempCode));
-
+            if (!isInDict) {
+                System.out.println(dictionary.get(tempCode).substring(0, Character.charCount(dictionary.get(tempCode).codePointAt(0))));
+                result.append(dictionary.get(tempCode), 0, Character.charCount(dictionary.get(tempCode).codePointAt(0)));
+            }
             return result.toString();
         }
     }

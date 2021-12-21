@@ -11,8 +11,6 @@ public class BWT {
         // выводим все символы под подходящем
         ArrayList<String> cycleOffset = getCycleOffsets(src);
 
-        System.out.println(cycleOffset);
-
         StringBuilder resultTemp = new StringBuilder();
         int index = 0;
         for (String cyc : cycleOffset) {
@@ -92,19 +90,23 @@ public class BWT {
 
     private ArrayList<String> getCycleOffsets(String str) {
         // находим циклические сдвиги
-        ArrayList<String> cycleOffset = new ArrayList<>();
+        ArrayList<String> cycleOffsets = new ArrayList<>();
 
-        StringBuilder cycleTemp = new StringBuilder(str);
-        for (int i = 0; i < str.length();) {
+        StringBuilder temp = new StringBuilder(str);
+
+        for(int i = 0; i < str.length();) {
             int utf8Code = str.codePointAt(i);
-            cycleOffset.add(cycleTemp.toString());
-            cycleTemp.append(cycleTemp.substring(Character.charCount(utf8Code)));
-            cycleTemp.append(cycleTemp.substring(0, Character.charCount(utf8Code)));
-            cycleTemp.delete(0, str.length());
+
+            temp.delete(0, i);
+            temp.append(str, 0, i);
+            cycleOffsets.add(temp.toString());
+
+            temp.setLength(0);
+            temp.append(str);
             i += Character.charCount(utf8Code);
         }
-        Collections.sort(cycleOffset);
+        Collections.sort(cycleOffsets);
 
-        return cycleOffset;
+        return cycleOffsets;
     }
 }

@@ -39,7 +39,7 @@ public class Main {
 
             lzw.writeToFile(
                     "./coderResult.txt",
-                    alphabet + "_S_P_L-I-T_A_L_P_H_A-B-_E_T" + bwtResult.getValue() + "_S_P_L-I-T_D_A-T_-A" + encoded
+                    alphabet + " ----- " + bwtResult.getValue() + " ----- " + encoded
             );
         } else if (mode == 2) {
             Pair<Pair<String, Integer>, String> data = lzwDecode.readFile("./coderResult.txt");

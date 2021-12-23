@@ -2,8 +2,7 @@ package ru.itis.lzw.algorithm;
 
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 public class BWT {
 

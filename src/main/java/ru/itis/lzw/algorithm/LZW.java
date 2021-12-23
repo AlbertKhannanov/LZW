@@ -136,7 +136,7 @@ public class LZW {
 
     public static class Decode {
 
-        public LinkedHashMap<String, String> dictionary = new LinkedHashMap<>();
+        private final LinkedHashMap<String, String> dictionary = new LinkedHashMap<>();
 
         public LinkedHashMap<String, String> getDictionary() {
             return dictionary;
@@ -240,13 +240,12 @@ public class LZW {
             Integer index;
             String encoded;
 
-            String[] splitSourceDataWithEncoded = rawData.split("(?<=\\d)_S_P_L-I-T_D_A-T_-A");
-            String[] splitIndexAndAlphabet = splitSourceDataWithEncoded[0].split("_S_P_L-I-T_A_L_P_H_A-B-_E_T(?=\\d)");
+            String[] splitedData = rawData.split(" ----- ");
 
-            alphabet = splitIndexAndAlphabet[0];
-            index = Integer.parseInt(splitIndexAndAlphabet[1]);
+            alphabet = splitedData[0];
+            index = Integer.parseInt(splitedData[1]);
             try {
-                encoded = splitSourceDataWithEncoded[1];
+                encoded = splitedData[2];
             } catch (Exception e) {
                 encoded = "";
             }

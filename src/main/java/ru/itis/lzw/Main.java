@@ -27,35 +27,37 @@ public class Main {
 
             String source = lzwPrepare.readFile(path);
 
-            Pair<String, Integer> bwtResult = bwt.modifiedSequence(source);
+            Pair<String, Integer> bwtResult = bwt.modifySequence(source);
 
             source = bwtResult.getKey();
 
-            lzw.initDictionary(source);
+            String alphabet = lzw.getAlphabet(source);
+
+            lzw.initDictionary(alphabet);
 
             String encoded = lzw.algorithm(source);
 
-            System.out.println(source);
-
             lzw.writeToFile(
                     "./coderResult.txt",
-                    bwtResult.getKey() + "_S_P_L-I-T_A_L_P_H_A-B-_E_T" + bwtResult.getValue() + "_S_P_L-I-T_D_A-T_-A" + encoded
+                    alphabet + "_S_P_L-I-T_A_L_P_H_A-B-_E_T" + bwtResult.getValue() + "_S_P_L-I-T_D_A-T_-A" + encoded
             );
         } else if (mode == 2) {
-            String rawData = lzwDecode.readFile("./coderResult.txt");
-            Pair<Pair<String, Integer>, String> indexAndEncoded = lzwDecode.getDataForDecoder(rawData);
+            Pair<Pair<String, Integer>, String> data = lzwDecode.readFile("./coderResult.txt");
 
-            String alphabet = indexAndEncoded.getKey().getKey();
-            Integer index = indexAndEncoded.getKey().getValue();
-            String encoded = indexAndEncoded.getValue();
+            String alphabet = data.getKey().getKey();
+            Integer index = data.getKey().getValue();
+            String encoded = data.getValue();
+
+            if (encoded.equals("")) {
+                lzwDecode.writeToFile("./decoderResult.txt", "");
+                return;
+            }
 
             lzwDecode.initDictionary(alphabet);
 
-
             String lzwDecoded = lzwDecode.decode(encoded);
-            System.out.println(lzwDecoded);
 
-            String bwtDecoded = bwt.restoreInitString(new Pair<>(lzwDecoded, index));
+            String bwtDecoded = bwt.restoreInitString(lzwDecoded, index);
 
             lzwDecode.writeToFile("./decoderResult.txt", bwtDecoded);
         }

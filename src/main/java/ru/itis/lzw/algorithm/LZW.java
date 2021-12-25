@@ -2,9 +2,8 @@ package ru.itis.lzw.algorithm;
 
 import javafx.util.Pair;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
@@ -19,7 +18,7 @@ public class LZW {
     private static final int from = 0;
 
     public void initDictionary(String alphabet) {
-        for (int i = 0; i < alphabet.length();) {
+        for (int i = 0; i < alphabet.length(); ) {
             int utf8Code = alphabet.codePointAt(i);
 
             dictionary.put(
@@ -36,7 +35,7 @@ public class LZW {
         StringBuilder result = new StringBuilder();
 
         StringBuilder currentString = new StringBuilder();
-        for (int i = 0; i < source.length();) {
+        for (int i = 0; i < source.length(); ) {
             int utf8Code = source.codePointAt(i);
 
             currentString.append(source, i, i + Character.charCount(utf8Code));
@@ -78,7 +77,8 @@ public class LZW {
     }
 
     public void writeToFile(String path, String data) {
-        try (FileWriter writer = new FileWriter(path, false)) {
+        try (OutputStreamWriter writer =
+                     new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8)) {
             writer.write(data);
             writer.flush();
         } catch (IOException ex) {
@@ -91,10 +91,10 @@ public class LZW {
         StringBuilder result = new StringBuilder();
         HashSet<String> symbols = new HashSet<>();
 
-        for (int i = 0; i < source.length();) {
+        for (int i = 0; i < source.length(); ) {
             int utf8Code = source.codePointAt(i);
 
-            String curSymbol = source.substring(i, i + Character.charCount(utf8Code));
+            String curSymbol = source.substring(i, i + Character.charCount(utf8Code)).replaceAll("\r\n", "\n");
             if (!symbols.contains(curSymbol)) {
                 result.append(curSymbol);
             }
@@ -104,6 +104,39 @@ public class LZW {
         }
 
         return result.toString();
+    }
+
+    public long getResultSize(String alphabet, Integer index, String encoded) {
+        long size = 0;
+
+        for (int i = 0; i < alphabet.length();) {
+            int utf8Code = alphabet.codePointAt(i);
+
+            for (byte b : alphabet.substring(i, i + Character.charCount(utf8Code)).getBytes(StandardCharsets.UTF_8)) {
+                size += 8;
+            }
+
+            i += Character.charCount(utf8Code);
+        }
+
+        size += Integer.toBinaryString(index).length();
+
+        String splitStr = " ----- ";
+        for (int i = 0; i < splitStr.length();) {
+            int utf8Code = splitStr.codePointAt(i);
+
+            for (byte b : splitStr.substring(i, i + Character.charCount(utf8Code)).getBytes(StandardCharsets.UTF_8)) {
+                size += 16;
+            }
+
+            i += Character.charCount(utf8Code);
+        }
+
+        for (int i = 0; i < encoded.length(); i++) {
+            size++;
+        }
+
+        return size;
     }
 
     private int getLastSymbolIndex(StringBuilder tempStr) {
@@ -119,15 +152,15 @@ public class LZW {
 
     public static class Prepare {
 
-        public String readFile(String path) {
+        public String readFile(String path) throws Exception {
             StringBuilder result = new StringBuilder();
-            try (FileReader reader = new FileReader(path)) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
                 int c;
                 while ((c = reader.read()) != -1) {
                     result.append((char) c);
                 }
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
+            } catch (Exception exception) {
+                throw new Exception("Не удаётся считать файл");
             }
 
             return result.toString();
@@ -144,7 +177,7 @@ public class LZW {
 
         public Pair<Pair<String, Integer>, String> readFile(String path) {
             StringBuilder result = new StringBuilder();
-            try (FileReader reader = new FileReader(path)) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8)) {
                 int c;
                 while ((c = reader.read()) != -1) {
                     result.append((char) c);
@@ -203,11 +236,21 @@ public class LZW {
         }
 
         public void initDictionary(String alphabet) {
-            for (int i = 0; i < alphabet.length();) {
+            int howManySymbols = 0;
+
+            for (int i = 0; i < alphabet.length(); ) {
+                int utf8Code = alphabet.codePointAt(i);
+
+                howManySymbols++;
+
+                i += Character.charCount(utf8Code);
+            }
+
+            for (int i = 0; i < alphabet.length(); ) {
                 int utf8Code = alphabet.codePointAt(i);
 
                 dictionary.put(
-                        addZeroBits(Integer.toBinaryString(dictionary.size()), alphabet.length()),
+                        addZeroBits(Integer.toBinaryString(dictionary.size()), howManySymbols),
                         alphabet.substring(i, i + Character.charCount(utf8Code))
                 );
 
@@ -226,7 +269,8 @@ public class LZW {
         }
 
         public void writeToFile(String path, String data) {
-            try (FileWriter writer = new FileWriter(path, false)) {
+            try (OutputStreamWriter writer =
+                         new OutputStreamWriter(new FileOutputStream(path), StandardCharsets.UTF_8)) {
                 writer.write(data);
                 writer.flush();
             } catch (IOException ex) {

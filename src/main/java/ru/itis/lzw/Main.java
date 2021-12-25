@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import ru.itis.lzw.algorithm.BWT;
 import ru.itis.lzw.algorithm.LZW;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Main {
@@ -13,7 +14,7 @@ public class Main {
     private final static LZW.Prepare lzwPrepare = new LZW.Prepare();
     private final static LZW.Decode lzwDecode = new LZW.Decode();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         Scanner scan = new Scanner(System.in);
 
@@ -41,6 +42,13 @@ public class Main {
                     "./coderResult.txt",
                     alphabet + " ----- " + bwtResult.getValue() + " ----- " + encoded
             );
+
+            System.out.println();
+            System.out.println("Размер входных данных в битах: " + source.getBytes(StandardCharsets.UTF_8).length * 8);
+            System.out.println("Сжатый размер в битах: " + lzw.getResultSize(alphabet, bwtResult.getValue(), encoded));
+
+            scan.nextLine();
+            scan.nextLine();
         } else if (mode == 2) {
             Pair<Pair<String, Integer>, String> data = lzwDecode.readFile("./coderResult.txt");
 
